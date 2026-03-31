@@ -1,0 +1,5 @@
+VERSION=1.0
+BUILD_DATE=2026-04-01 10:00:00
+TARGET_FILE=_internal.zip
+MIN_APP_VERSION=0.1
+CHANGELOG=Rilis stabil pertama (v1.0). Migrasi sistem pembaruan ke format ZIP Extractor dan perbaikan UI.
