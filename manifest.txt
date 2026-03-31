@@ -1,14 +1,15 @@
 📄 MANIFEST UPDATE - INTISARICLIPS-DEV
-📅 Tanggal Build  : 2026-03-31 18:45:37
+📅 Tanggal Build  : 2026-04-01 03:07:46
 ======================================================================
 NAMA FILE                                     | VERSI SAAT INI
 ----------------------------------------------------------------------
 ✅ config.py                                   | 1.5 (Fix: Update Whisper ZIP URL)
-✅ main.py                                     | 1.24 (Fix: PyInstaller Router & Root Pathing untuk Standalone Updater)
+✅ main.py                                     | 1.27 (Feat: Cermin Ganda Terminal DEV & WebSocket UI)
+✅ manifest.txt                                | File Statis / Resource
 ✅ core/downloader.py                          | 4.18 (Fix: GitHub Anti-Bot Bypass with User-Agent & Safe Threads)
 ✅ core/engine.py                              | 2.7 (Fix: Menambal kebocoran terminal pada ffprobe get_duration)
 ✅ core/license.py                             | 2.5
-✅ core/updater.py                             | 2.0 (Feat: Manifest-Driven Delta Patcher & Hot-Swap)
+✅ core/updater.py                             | 3.5 (True Delta Sync - TXT Manifest Parser)
 ✅ core/__init__.py                            | 1.0
 ✅ core/services/content_analysis.py           | 1.0
 ✅ core/services/face_engine.py                | 3.1 (Fix: Robust HaarCascade Path Resolution for Compiled Environment)
