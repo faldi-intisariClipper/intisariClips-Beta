@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intisari Clips Engine</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', path='assets/Favicon.png') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+    <style>
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 300ms, transform 300ms; }
+        .modal-leave { opacity: 1; transform: scale(1); }
+        .modal-leave-active { opacity: 0; transform: scale(0.95); transition: opacity 200ms, transform 200ms; }
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen relative overflow-hidden">
+
+    {% if not is_authenticated %}
+    
+    <div class="flex items-center justify-center min-h-screen w-full relative">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-indigo-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-20"></div>
+
+        <div class="bg-gray-800/80 backdrop-blur-xl border border-gray-700/50 p-8 rounded-2xl shadow-2xl w-full max-w-md z-10 relative">
+            
+            <div class="text-center mb-8">
+                <div class="flex justify-center mb-4">
+                    <img src="{{ url_for('static', path='logo.png') }}" 
+                         onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Intisari+AutoCut&background=2563eb&color=fff&size=80&rounded=true&font-size=0.33';" 
+                         alt="Intisari Logo" 
+                         class="h-20 w-auto drop-shadow-lg object-contain">
+                </div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Intisari AutoCut</h1>
+                <p class="text-sm text-gray-400 mt-1">Sistem Autentikasi Keamanan V4.1</p>
+            </div>
+
+            <form id="premiumForm" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Nama Pengguna</label>
+                    <div class="relative mb-4">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="user" class="h-5 w-5 text-gray-500"></i>
+                        </div>
+                        <input type="text" id="premiumNameInput" placeholder="Cth: Kang Faldi..." 
+                               class="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl leading-5 bg-gray-900/50 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all" required>
+                    </div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Lisensi Premium</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="key" class="h-5 w-5 text-gray-500"></i>
+                        </div>
+                        <input type="text" id="premiumKeyInput" placeholder="Masukkan Kunci Lisensi Anda..." 
+                               class="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-xl leading-5 bg-gray-900/50 text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500 transition-all duration-200">
+                    Aktivasi Premium
+                </button>
+            </form>
+
+            <div class="mt-8 mb-6 relative">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-700"></div></div>
+                <div class="relative flex justify-center"><span class="px-3 bg-gray-800 text-sm text-gray-400">Atau belum punya lisensi?</span></div>
+            </div>
+
+            <button onclick="openTrialModal()" class="w-full flex justify-center py-3 px-4 border border-gray-600 rounded-xl shadow-sm text-sm font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 hover:text-white focus:outline-none transition-all duration-200">
+                <i data-lucide="gift" class="h-4 w-4 mr-2"></i> Klaim Trial Gratis 7 Hari
+            </button>
+        </div>
+
+        <div id="trialModal" class="fixed inset-0 z-50 flex items-center justify-center hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onclick="closeTrialModal()"></div>
+            <div id="modalPanel" class="relative bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden modal-enter transform transition-all">
+                
+                <button onclick="closeTrialModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors focus:outline-none">
+                    <i data-lucide="x" class="h-6 w-6"></i>
+                </button>
+
+                <div class="p-6 sm:p-8">
+                    <div class="text-center mb-6">
+                        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-900/50 mb-3 border border-blue-500/30">
+                            <i data-lucide="mail-check" class="h-6 w-6 text-blue-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white" id="modal-title">Klaim Trial 7 Hari</h3>
+                        <p class="text-sm text-gray-400 mt-2">Dapatkan akses penuh ke seluruh fitur tanpa batasan (Watermark Free).</p>
+                    </div>
+
+                    <div class="bg-blue-900/30 border border-blue-500/30 rounded-lg p-3 mb-6 flex items-start">
+                        <i data-lucide="info" class="h-5 w-5 text-blue-400 mt-0.5 mr-3 flex-shrink-0"></i>
+                        <p class="text-xs text-blue-200 leading-relaxed">
+                            <strong class="text-white">Penting:</strong> Kode Lisensi Trial akan dikirimkan otomatis ke alamat email yang Anda masukkan di bawah. Pastikan email aktif!
+                        </p>
+                    </div>
+
+                    <form id="requestTrialForm" onsubmit="handleRequestTrial(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Nama Lengkap</label>
+                                <input type="text" id="trialNama" required placeholder="Cth: Budi Santoso" class="block w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-900/50 text-white text-sm focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1">No. WhatsApp</label>
+                                <input type="text" id="trialWa" required placeholder="Cth: 0812..." class="block w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-900/50 text-white text-sm focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Email Aktif</label>
+                            <input type="email" id="trialEmail" required placeholder="nama@email.com" class="block w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-900/50 text-white text-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <button type="submit" id="btnRequest" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-blue-100 bg-gray-700 hover:bg-gray-600 focus:outline-none transition-colors border border-gray-500">
+                            <i data-lucide="send" class="h-4 w-4 mr-2"></i> Kirim Lisensi ke Email
+                        </button>
+                    </form>
+
+                    <div class="mt-6 mb-6 relative">
+                        <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-gray-700 border-dashed"></div></div>
+                        <div class="relative flex justify-center"><span class="px-3 bg-gray-800 text-xs text-gray-500 uppercase tracking-wider font-semibold">Sudah Menerima Email?</span></div>
+                    </div>
+
+                    <form id="activateTrialForm" onsubmit="handleActivateTrial(event)" class="space-y-3">
+                        <div>
+                            <input type="text" id="trialCodeInput" placeholder="Tempel (Paste) Kode Trial di sini..." required
+                                   class="block w-full px-4 py-3 border border-gray-600 rounded-xl leading-5 bg-gray-900 text-center text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono tracking-widest sm:text-lg transition-all">
+                        </div>
+                        <button type="submit" id="btnActivate" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-green-600 hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-green-500 transition-all shadow-[0_0_15px_rgba(22,163,74,0.3)]">
+                            <i data-lucide="unlock" class="h-5 w-5 mr-2"></i> Aktivasi Trial Sekarang
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        
+        <div id="fileBrowserModal" class="fixed inset-0 z-50 flex items-center justify-center hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onclick="closeFileBrowser()"></div>
+            <div class="relative bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-3xl mx-4 overflow-hidden flex flex-col max-h-[85vh] animate-fade-in">
+                <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-[#0B1120]">
+                    <h3 class="text-lg font-black text-white flex items-center gap-3">
+                        <i class="fa-solid fa-folder-open text-blue-500"></i> Internal Explorer
+                    </h3>
+                    <button onclick="closeFileBrowser()" class="text-slate-500 hover:text-red-400 transition-colors bg-slate-800 hover:bg-red-500/10 h-8 w-8 rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+                <div class="p-3 bg-slate-950 text-[10px] font-mono text-blue-400 break-all border-b border-slate-800/50 flex items-center gap-2">
+                    <i class="fa-solid fa-hard-drive text-slate-600"></i>
+                    <span id="fb-current-path">/path/to/folder</span>
+                </div>
+                <div class="flex-1 overflow-y-auto p-4 space-y-2 bg-slate-900" id="fb-file-list">
+                    </div>
+            </div>
+        </div>
+
+        <div id="toast-notification"  class="absolute top-6 right-6 z-50 shadow-2xl rounded-lg px-6 py-3 text-sm font-medium transition-all duration-300 transform translate-y-[-100%] opacity-0 bg-slate-800 border border-slate-700 text-slate-200">
+            <span id="toast-msg">Notifikasi</span>
+        </div>
+
+        <script>
+            lucide.createIcons();
+            const modal = document.getElementById('trialModal');
+            const panel = document.getElementById('modalPanel');
+
+            // [INTISARI UPDATE] Fungsi Penggerak Toast Notification
+            function showToast(message, type = 'success') {
+                const toast = document.getElementById('toast-notification');
+                const msg = document.getElementById('toast-msg');
+                if (!toast || !msg) return;
+                
+                msg.innerHTML = type === 'success' 
+                    ? `<i data-lucide="check-circle" class="inline w-4 h-4 mr-2 text-emerald-400"></i> ${message}` 
+                    : `<i data-lucide="alert-circle" class="inline w-4 h-4 mr-2 text-red-400"></i> ${message}`;
+                lucide.createIcons();
+                
+                toast.style.transform = 'translateY(0)';
+                toast.style.opacity = '1';
+                
+                setTimeout(() => {
+                    toast.style.transform = 'translateY(-100%)';
+                    toast.style.opacity = '0';
+                }, 4000);
+            }
+
+            function openTrialModal() {
+                modal.classList.remove('hidden');
+                setTimeout(() => { panel.classList.remove('modal-enter'); panel.classList.add('modal-enter-active'); }, 10);
+            }
+            function closeTrialModal() {
+                panel.classList.remove('modal-enter-active'); panel.classList.add('modal-leave-active');
+                setTimeout(() => { modal.classList.add('hidden'); panel.classList.remove('modal-leave-active'); panel.classList.add('modal-enter'); }, 200);
+            }
+
+            document.getElementById('premiumForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const keyInput = document.getElementById('premiumKeyInput').value;
+                const nameInput = document.getElementById('premiumNameInput').value;
+                const btn = e.target.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
+                
+                btn.innerHTML = '<i data-lucide="loader" class="h-4 w-4 mr-2 animate-spin"></i> Memvalidasi...';
+                btn.disabled = true; lucide.createIcons();
+
+                try {
+                    const res = await fetch('/api/auth/activate', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: keyInput, name: nameInput })
+                    });
+                    const data = await res.json();
+                    if (data.success) { 
+                        showToast(`Aktivasi Berhasil! Selamat Datang, ${data.member_id}`, 'success'); 
+                        setTimeout(() => window.location.reload(), 1500); 
+                    } 
+                    else { 
+                        showToast(`Akses Ditolak: ${data.message}`, 'error'); 
+                        btn.innerHTML = originalText; btn.disabled = false; 
+                    }
+                } catch (err) { showToast('Kesalahan server lokal.', 'error'); btn.innerHTML = originalText; btn.disabled = false; }
+            });
+
+            async function handleRequestTrial(e) {
+                e.preventDefault();
+                const nama = document.getElementById('trialNama').value;
+                const wa = document.getElementById('trialWa').value;
+                const email = document.getElementById('trialEmail').value;
+                const btn = document.getElementById('btnRequest');
+                
+                btn.innerHTML = '<i data-lucide="loader" class="h-4 w-4 mr-2 animate-spin"></i> Mengirim...';
+                btn.disabled = true; btn.classList.add('opacity-70'); lucide.createIcons();
+
+                try {
+                    const res = await fetch('/api/auth/request-trial', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nama, wa, email })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Kode Lisensi berhasil dikirim! Silakan cek kotak masuk/SPAM Anda.', 'success');
+                        btn.innerHTML = '<i data-lucide="check-circle" class="h-4 w-4 mr-2"></i> Terkirim! Cek Email';
+                        btn.classList.remove('bg-gray-700', 'text-blue-100'); btn.classList.add('bg-blue-600', 'text-white');
+                        
+                        // [INTISARI UPDATE] UX Auto-Focus ke form aktivasi dengan efek glow
+                        const activateInput = document.getElementById('trialCodeInput');
+                        activateInput.focus();
+                        activateInput.classList.add('ring-2', 'ring-emerald-500', 'border-emerald-500');
+                        setTimeout(() => activateInput.classList.remove('ring-2', 'ring-emerald-500', 'border-emerald-500'), 3000);
+                    } else { 
+                        showToast(`Gagal: ${data.message}`, 'error'); 
+                        btn.innerHTML = '<i data-lucide="send" class="h-4 w-4 mr-2"></i> Kirim Lisensi ke Email'; 
+                        btn.disabled = false; btn.classList.remove('opacity-70'); 
+                    }
+                    lucide.createIcons();
+                } catch (err) { showToast('Kesalahan server lokal.', 'error'); btn.innerHTML = '<i data-lucide="send" class="h-4 w-4 mr-2"></i> Kirim Lisensi ke Email'; btn.disabled = false; }
+            }
+
+            async function handleActivateTrial(e) {
+                e.preventDefault();
+                const code = document.getElementById('trialCodeInput').value;
+                const btn = document.getElementById('btnActivate');
+                const originalText = btn.innerHTML;
+                
+                btn.innerHTML = '<i data-lucide="loader" class="h-5 w-5 mr-2 animate-spin"></i> Mengaktivasi...';
+                btn.disabled = true; lucide.createIcons();
+
+                try {
+                    const res = await fetch('/api/auth/activate-trial', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: code })
+                    });
+                    const data = await res.json();
+                    if (data.success) { 
+                        showToast(`SUCCESS: ${data.message}`, 'success'); 
+                        btn.innerHTML = '<i data-lucide="check-circle" class="h-5 w-5 mr-2"></i> Berhasil!';
+                        setTimeout(() => window.location.reload(), 1500); 
+                    } 
+                    else { 
+                        showToast(`GAGAL: ${data.message}`, 'error'); 
+                        btn.innerHTML = originalText; btn.disabled = false; 
+                    }
+                } catch (err) { showToast('Kesalahan server lokal.', 'error'); btn.innerHTML = originalText; btn.disabled = false; }
+            }
+        </script>
+    </div>
+
+    {% else %}
+    
+    <div class="flex h-screen w-full bg-[#0B1120] text-slate-200 font-sans overflow-hidden">
+        
+        <div class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 shadow-2xl z-20">
+            <div class="p-6 border-b border-slate-800">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                        <i class="fa-solid fa-scissors text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-black text-white tracking-tight">Intisari Clips</h1>
+                        <p class="text-[10px] text-blue-400 font-bold tracking-widest uppercase">Engine V{{ version }}</p>
+                    </div>
+                </div>
+                <div class="bg-slate-800/50 rounded-lg p-2.5 border border-slate-700/50 backdrop-blur-sm">
+                    <p class="text-[10px] text-slate-400 mb-2 font-semibold uppercase tracking-wider">Status Lisensi</p>
+                    <div class="flex items-center">
+                        {% if '[PAID]' in member_id %}
+                        <div class="flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 rounded-lg shadow-inner w-full hover:bg-amber-500/20 transition">
+                            <i class="fa-solid fa-crown text-amber-400 text-sm"></i>
+                            <span class="text-xs font-black text-amber-400 tracking-widest uppercase drop-shadow-md">Premium</span>
+                        </div>
+                        {% elif '[TRIAL]' in member_id %}
+                        <div class="flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/30 rounded-lg shadow-inner w-full hover:bg-blue-500/20 transition">
+                            <i class="fa-solid fa-clock-rotate-left text-blue-400 text-sm"></i>
+                            <span class="text-xs font-black text-blue-400 tracking-widest uppercase drop-shadow-md">Trial 7 Hari</span>
+                        </div>
+                        {% else %}
+                        <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg w-full">
+                            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                            <p class="text-[10px] text-emerald-400 font-bold truncate">{{ member_id }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4 space-y-1 scrollbar-hide">
+                <p class="px-4 text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 mt-4">Menu Utama</p>
+                
+                <button onclick="switchPage('welcome', this)" class="nav-btn bg-indigo-600 text-white shadow-lg shadow-indigo-900/20 w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-base font-semibold tracking-wide">
+                    <i class="fa-solid fa-house w-5 text-center"></i> Beranda
+                </button>
+                
+                <button onclick="switchPage('studio', this)" class="nav-btn hover:bg-slate-800 text-slate-400 hover:text-slate-200 w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-base font-semibold tracking-wide">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i> Command Center
+                </button>
+                <button onclick="switchPage('presets', this)" class="nav-btn hover:bg-slate-800 text-slate-400 hover:text-slate-200 w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-base font-semibold tracking-wide">
+                    <i class="fa-solid fa-sliders w-5 text-center"></i> Preset Style
+                </button>
+
+                <p class="px-4 text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 mt-8">Tools Ekstraksi</p>
+                
+                <button onclick="switchPage('sosmed', this)" class="nav-btn hover:bg-slate-800 text-slate-400 hover:text-slate-200 w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-base font-semibold tracking-wide">
+                    <i class="fa-solid fa-cloud-arrow-down w-5 text-center"></i> Sosmed Grabber
+                </button>
+                <button onclick="switchPage('clipper', this)" class="nav-btn hover:bg-slate-800 text-slate-400 hover:text-slate-200 w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-base font-semibold tracking-wide">
+                    <i class="fa-solid fa-film w-5 text-center"></i> Batch Clipper
+                </button>
+                <button onclick="switchPage('hook', this)" class="nav-btn hover:bg-slate-800 text-slate-400 hover:text-slate-200 w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-base font-semibold tracking-wide">
+                    <i class="fa-solid fa-link w-5 text-center"></i> Hook Studio
+                </button>
+                <button onclick="switchPage('history', this)" class="nav-btn hover:bg-slate-800 text-slate-400 hover:text-slate-200 w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-base font-semibold tracking-wide">
+                    <i class="fa-solid fa-box-archive w-5 text-center"></i> History Vault
+                </button>
+
+                <p class="px-4 text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 mt-8">Sistem</p>
+                
+                <button onclick="switchPage('settings', this)" class="nav-btn hover:bg-slate-800 text-slate-400 hover:text-slate-200 w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-base font-semibold tracking-wide">
+                    <i class="fa-solid fa-gear w-5 text-center"></i> Pengaturan
+                </button>
+            </div>
+
+            <div class="p-4 border-t border-slate-800 bg-slate-900">
+                <div class="flex items-center gap-3 bg-[#0B1120] p-3 rounded-lg border border-slate-800">
+                    <div class="relative">
+                        <span id="ws-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span id="ws-dot" class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Engine Status</p>
+                        <p id="ws-status" class="text-[10px] font-bold text-emerald-400 font-mono mt-0.5">Menghubungkan...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col relative overflow-hidden bg-[#070b14]">
+            <img src="{{ url_for('static', path='logo.png') }}" class="absolute inset-0 m-auto w-[40%] opacity-[0.03] grayscale pointer-events-none z-0" alt="Watermark">
+            <div class="relative z-10 w-full h-full overflow-y-auto">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+        
+        
+        <div id="fileBrowserModal" class="fixed inset-0 z-50 flex items-center justify-center hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onclick="closeFileBrowser()"></div>
+            <div class="relative bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-3xl mx-4 overflow-hidden flex flex-col max-h-[85vh] animate-fade-in">
+                <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-[#0B1120]">
+                    <h3 class="text-lg font-black text-white flex items-center gap-3">
+                        <i class="fa-solid fa-folder-open text-blue-500"></i> Internal Explorer
+                    </h3>
+                    <button onclick="closeFileBrowser()" class="text-slate-500 hover:text-red-400 transition-colors bg-slate-800 hover:bg-red-500/10 h-8 w-8 rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+                <div class="p-3 bg-slate-950 text-[10px] font-mono text-blue-400 break-all border-b border-slate-800/50 flex items-center gap-2">
+                    <i class="fa-solid fa-hard-drive text-slate-600"></i>
+                    <span id="fb-current-path">/path/to/folder</span>
+                </div>
+                <div class="flex-1 overflow-y-auto p-4 space-y-2 bg-slate-900" id="fb-file-list">
+                    </div>
+            </div>
+        </div>
+
+        <div id="toast-notification"  class="absolute top-6 right-6 z-50 shadow-2xl rounded-lg px-6 py-3 text-sm font-medium transition-all duration-300 transform translate-y-[-100%] opacity-0 bg-slate-800 border border-slate-700 text-slate-200">
+            <span id="toast-msg">Notifikasi</span>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="{{ url_for('static', path='js/app.js') }}?v=1774801629"></script>
+    
+    {% endif %}
+
+</body>
+</html>

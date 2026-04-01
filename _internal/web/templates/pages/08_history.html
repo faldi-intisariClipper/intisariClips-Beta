@@ -1,0 +1,21 @@
+<div id="page-history" class="page hidden animate-fade-in max-w-6xl mx-auto space-y-6 px-5 pt-8 pb-5 relative">
+    <header class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6 mt-2">
+        <h2 class="text-3xl font-bold text-white flex items-center gap-3"><i class="fa-solid fa-clock-rotate-left text-blue-500"></i> History Vault</h2>
+        <div class="flex flex-col items-end gap-3">
+            <div class="flex items-center gap-3 bg-slate-900/50 px-3 py-1.5 rounded-full border border-slate-800 shadow-sm">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                <span class="text-[10px] font-bold text-slate-400 tracking-wider">VERSI = 2.1 (Fix: Layout Overlap)</span>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="loadStats()" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold text-xs text-slate-200 transition-colors border border-slate-700 shadow-sm"><i class="fa-solid fa-rotate-right mr-2"></i> REFRESH</button>
+                <button onclick="clearHistory()" class="bg-red-900/40 hover:bg-red-600 px-4 py-2 rounded-lg font-bold text-xs text-red-400 hover:text-white border border-red-800/50 hover:border-red-500 transition-all shadow-sm"><i class="fa-solid fa-trash-can mr-2"></i> CLEAR</button>
+            </div>
+        </div>
+    </header>
+    <div id="history-container" class="flex-1 bg-slate-900 border border-slate-800 rounded-2xl p-6 overflow-y-auto custom-scrollbar space-y-4 shadow-inner">
+        <p class="text-slate-500 italic text-sm text-center mt-10">Memuat history...</p>
+    </div>
+</div>
